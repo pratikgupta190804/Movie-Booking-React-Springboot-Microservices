@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: userservice
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/user-db
+      database: user-db
+      auto-index-creation: true
+
+  cloud:
+    config:
+      uri: http://localhost:8888
+      fail-fast: false
+      enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.moviebooking.userservice: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+app:
+  gateway:
+    secret: ${GATEWAY_SECRET:change-this-in-production}
