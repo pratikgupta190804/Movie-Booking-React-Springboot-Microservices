@@ -1,34 +1,40 @@
-package com.moviebooking.userservice.dto;
+package com.moviebooking.userservice.dtos;
 
 import com.moviebooking.userservice.model.Provider;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserSyncRequest {
+@NoArgsConstructor
+public class SyncUserRequest {
 
-    @NotBlank(message = "Keycloak ID is required")
-    private String keycloakId;
+    @NotBlank
+    private String id;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank
+    @Email
     private String email;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank
+    private String userName;
+
+    @NotBlank
     private String name;
 
+    @URL
     private String image;
 
-    @NotNull(message = "Provider is required")
     private Provider provider;
 
     private String providerId;
+
+    private String role;
+
 }

@@ -1,0 +1,28 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/user-db
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+keycloak:
+  server-url: http://localhost:8181
+  realm: movie-booking-app
+  client-id: movie-booking-client
+  client-secret: RQBkKZJrfMeKZG9TNpao6AWNG7KZAEo9
+  admin-username: admin
+  admin-password: admin
+
+server:
+  port: 8081

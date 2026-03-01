@@ -1,4 +1,4 @@
-package com.moviebooking.userservice.dto;
+package com.moviebooking.userservice.dtos;
 
 import com.moviebooking.userservice.model.Provider;
 import com.moviebooking.userservice.model.Role;
@@ -11,17 +11,21 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserResponse {
 
     private String id;
-    private String name;
     private String email;
+    private String userName;
+    private String name;
     private String image;
-    private boolean enabled;
-    private Role role;
-    private Provider provider;
-    private LocalDateTime createdAt;
-    private LocalDateTime lastLoginAt;
+    private boolean enabled = true;
+    private LocalDateTime createdAt ;
+    private LocalDateTime updatedAt ;
+
+    private String provider;
+    private  String providerId;
+
+    private String role;
 }

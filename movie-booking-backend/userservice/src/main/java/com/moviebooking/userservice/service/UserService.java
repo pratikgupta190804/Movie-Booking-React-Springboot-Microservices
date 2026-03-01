@@ -1,24 +1,20 @@
 package com.moviebooking.userservice.service;
 
-import com.moviebooking.userservice.dto.*;
+import com.moviebooking.userservice.dtos.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
-    UserResponse syncUser(UserSyncRequest request);
+    UserResponse syncUser(SyncUserRequest syncUserRequest);
 
-    UserResponse getUserById(String id);
+    UserResponse getCurrentMe(String loggedInUser);
 
-    UserResponse getUserByEmail(String email);
+    UserResponse getUserById(String requestedUserId);
 
-    UserResponse updateUser(String id, UserUpdateRequest request, String requestingUserId, String requestingUserRoles);
+    Page<UserResponse> getAllUser(Pageable pageable);
 
-    UserResponse assignRole(String id, AssignRoleDTO request, String requestingUserRoles);
+    UserResponse updateProfile(UserUpdateDto updateDto, String loggedInUser);
 
-    UserResponse updateStatus(String id, StatusUpdateRequest request, String requestingUserRoles);
-
-    void deleteUser(String id, String requestingUserId, String requestingUserRoles);
-
-    Page<UserResponse> getAllUsers(Pageable pageable, String requestingUserRoles);
+    void disableProfile(String userId, String loggedInUser);
 }

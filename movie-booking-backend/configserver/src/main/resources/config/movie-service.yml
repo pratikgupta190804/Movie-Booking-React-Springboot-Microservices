@@ -1,5 +1,0 @@
-server:
-  port: 8081
-
-test:
-  message: Hello from Config Server

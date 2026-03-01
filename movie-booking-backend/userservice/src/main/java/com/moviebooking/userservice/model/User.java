@@ -1,11 +1,8 @@
 package com.moviebooking.userservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,37 +10,36 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "users")
-@Data
-@Builder
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class User {
 
-    @Id
     private String id;
-
-    private String name;
 
     @Indexed(unique = true)
     private String email;
 
+    private String userName;
+    private String name;
+    @JsonIgnore
+    private String password;
     private String image;
 
     @Builder.Default
     private boolean enabled = true;
 
-    @Builder.Default
-    private Role role = Role.ROLE_CUSTOMER;
-
-    private Provider provider;
-
-    private String providerId;
-
-    private LocalDateTime lastLoginAt;
-
     @CreatedDate
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt ;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt ;
+
+    @Builder.Default
+    private Provider provider = Provider.LOCAL;
+    private  String providerId;
+
+    private Role role;
 }
