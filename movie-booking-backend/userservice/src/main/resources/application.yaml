@@ -41,9 +41,9 @@ keycloak:
   server-url: http://localhost:8181
   realm: movie-booking-app
   client-id: movie-booking-client
-  client-secret: RQBkKZJrfMeKZG9TNpao6AWNG7KZAEo9
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
   admin-username: admin
-  admin-password: admin
+  admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
 
 server:
   port: 8081

@@ -10,15 +10,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-/**
- * Custom JWT authentication converter that validates:
- * 1. JWT token is valid (handled by Spring Security)
- * 2. User exists in the local database
- * 3. User account is enabled
- * 
- * This converter is used for all endpoints EXCEPT /api/users/sync,
- * ensuring users must be synced before accessing protected resources.
- */
+
 @RequiredArgsConstructor
 public class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 

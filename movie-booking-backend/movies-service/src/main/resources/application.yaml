@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: movies-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/movies-db
+    username: postgres
+    password: Pratik@321
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+          jwk-set-uri: http://localhost:8181/realms/movie-booking-app/protocol/openid-connect/certs
+
+server:
+  port: 8082
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#  instance:
+#    prefer-ip-address: true
+#    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.moviebooking.movieservice: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
