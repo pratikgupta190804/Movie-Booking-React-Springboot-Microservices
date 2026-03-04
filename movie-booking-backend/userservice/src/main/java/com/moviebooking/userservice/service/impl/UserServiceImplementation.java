@@ -28,7 +28,8 @@ public class UserServiceImplementation implements UserService {
 
         log.info("Syncing user with ID: {}", request.getId());
 
-        User user = getUserEntity(request.getId());
+        User user = new User();
+        user.setId(request.getId());
         user.setEnabled(true);
         user.setEmail(request.getEmail());
         user.setUserName(request.getUserName());

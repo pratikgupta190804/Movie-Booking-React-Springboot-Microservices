@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class GenreController {
     private final GenreService genreService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GenreDto> createGenre(
             @Valid @RequestBody GenreRequestDto requestDto,
             @AuthenticationPrincipal Jwt jwt) {
@@ -50,6 +52,7 @@ public class GenreController {
     }
 
     @PutMapping("/{genreId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GenreDto> updateGenre(
             @PathVariable String genreId,
             @Valid @RequestBody GenreRequestDto requestDto,
@@ -61,6 +64,7 @@ public class GenreController {
     }
 
     @DeleteMapping("/{genreId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteGenre(
             @PathVariable String genreId,
             @AuthenticationPrincipal Jwt jwt) {

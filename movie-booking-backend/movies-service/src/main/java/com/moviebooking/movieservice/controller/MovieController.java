@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class MovieController {
     private final MovieService movieService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieResponseDto> createMovie(
             @Valid @RequestBody MovieRequestDto requestDto,
             @AuthenticationPrincipal Jwt jwt) {
@@ -64,6 +66,7 @@ public class MovieController {
     }
 
     @PutMapping("/{movieId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieResponseDto> updateMovie(
             @PathVariable String movieId,
             @Valid @RequestBody MovieUpdateDto updateDto,
@@ -75,6 +78,7 @@ public class MovieController {
     }
 
     @PatchMapping("/{movieId}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieResponseDto> updateMovieStatus(
             @PathVariable String movieId,
             @RequestParam MovieStatus status,

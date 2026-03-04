@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class ActorController {
     private final ActorService actorService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> createActor(
             @Valid @RequestBody ActorRequestDto requestDto,
             @AuthenticationPrincipal Jwt jwt) {
@@ -56,6 +58,7 @@ public class ActorController {
     }
 
     @PutMapping("/{actorId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActorDto> updateActor(
             @PathVariable String actorId,
             @Valid @RequestBody ActorRequestDto requestDto,
@@ -74,6 +77,7 @@ public class ActorController {
     }
 
     @DeleteMapping("/{actorId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteActor(
             @PathVariable String actorId,
             @AuthenticationPrincipal Jwt jwt) {

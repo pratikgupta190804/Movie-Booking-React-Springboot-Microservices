@@ -20,6 +20,16 @@
         </processorPath>
         <module name="userservice" />
       </profile>
+      <profile name="Annotation profile for show-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+        </processorPath>
+        <module name="theatre-service" />
+        <module name="show-service" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="gateway" target="21" />
@@ -32,6 +42,8 @@
       <module name="eureka" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="movies-service" options="-parameters" />
+      <module name="show-service" options="-parameters" />
+      <module name="theatre-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
       <module name="userservice" options="-parameters" />
     </option>
