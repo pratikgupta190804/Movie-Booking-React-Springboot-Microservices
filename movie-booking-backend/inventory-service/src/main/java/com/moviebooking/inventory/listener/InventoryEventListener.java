@@ -1,0 +1,52 @@
+package com.moviebooking.inventory.listener;
+
+import com.moviebooking.inventory.dtos.PaymentFailedEvent;
+import com.moviebooking.inventory.dtos.PaymentSuccessfulEvent;
+import com.moviebooking.inventory.dtos.ShowCreatedEvent;
+import com.moviebooking.inventory.service.InventoryService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class InventoryEventListener {
+
+    private final InventoryService inventoryService;
+
+    @KafkaListener(topics = "show-created-event", groupId = "inventory-service")
+    public void handleShowCreated(ShowCreatedEvent event) {
+        log.info("Received ShowCreatedEvent for show: {}", event.getShowId());
+        try {
+            inventoryService.createInventoryForShow(event);
+            log.info("Successfully created inventory for show: {}", event.getShowId());
+        } catch (Exception e) {
+            log.error("Error processing ShowCreatedEvent for show: {}", event.getShowId(), e);
+            // In production, consider implementing retry logic or dead letter queue
+        }
+    }
+
+    @KafkaListener(topics = "payment-successful-event", groupId = "inventory-service")
+    public void handlePaymentSuccess(PaymentSuccessfulEvent event) {
+        log.info("Received PaymentSuccessfulEvent for booking: {}", event.getBookingId());
+        try {
+            inventoryService.confirmSeatsForBooking(event);
+            log.info("Successfully confirmed seats for booking: {}", event.getBookingId());
+        } catch (Exception e) {
+            log.error("Error processing PaymentSuccessfulEvent for booking: {}", event.getBookingId(), e);
+        }
+    }
+
+    @KafkaListener(topics = "payment-failed-event", groupId = "inventory-service")
+    public void handlePaymentFailed(PaymentFailedEvent event) {
+        log.info("Received PaymentFailedEvent for user: {}", event.getUserId());
+        try {
+            inventoryService.releaseSeatsAfterPaymentFailure(event);
+            log.info("Successfully released seats after payment failure");
+        } catch (Exception e) {
+            log.error("Error processing PaymentFailedEvent", e);
+        }
+    }
+}

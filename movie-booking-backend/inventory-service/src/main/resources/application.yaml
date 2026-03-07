@@ -1,0 +1,99 @@
+spring:
+  application:
+    name: inventory-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventory-db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Pratik@321}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+          jwk-set-uri: http://localhost:8181/realms/movie-booking-app/protocol/openid-connect/certs
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: inventory-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.moviebooking.inventory.dtos.ShowCreatedEvent
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8085
+
+kafka:
+  topic:
+    show-created: show-created-event
+    payment-successful: payment-successful-event
+    payment-failed: payment-failed-event
+    seat-reserved: seat-reserved-event
+    seat-lock-expired: seat-lock-expired-event
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#  instance:
+#    prefer-ip-address: true
+#    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.moviebooking.inventory: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    feign: DEBUG
+
+# Feign Configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+
+# Service URLs for OpenFeign clients
+theatre-service:
+  url: ${THEATRE_SERVICE_URL:http://localhost:8083}
