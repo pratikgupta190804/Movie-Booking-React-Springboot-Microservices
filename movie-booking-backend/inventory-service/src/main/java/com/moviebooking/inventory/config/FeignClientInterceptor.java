@@ -15,15 +15,22 @@ public class FeignClientInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
-        if (attributes != null) {
-            HttpServletRequest request = attributes.getRequest();
-            String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
 
-            if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_TOKEN_TYPE)) {
-                template.header(AUTHORIZATION_HEADER, authorizationHeader);
+                if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_TOKEN_TYPE)) {
+                    template.header(AUTHORIZATION_HEADER, authorizationHeader);
+                }
             }
+            // If no request context (e.g., Kafka listener), proceed without authorization header
+            // Target services should allow internal GET endpoints without authentication
+        } catch (Exception e) {
+            // Silently continue if we can't get request context
+            // This happens in non-HTTP contexts like Kafka listeners
         }
     }
 }

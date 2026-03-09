@@ -1,5 +1,6 @@
 package com.moviebooking.inventory.service.impl;
 
+import com.moviebooking.inventory.client.ShowServiceClient;
 import com.moviebooking.inventory.client.TheatreServiceClient;
 import com.moviebooking.inventory.dtos.*;
 import com.moviebooking.inventory.dtos.external.ScreenDto;
@@ -30,6 +31,7 @@ public class InventoryServiceImplementation implements InventoryService {
 
     private final ShowSeatInventoryRepository inventoryRepository;
     private final TheatreServiceClient theatreServiceClient;
+    private final ShowServiceClient showServiceClient;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
@@ -86,6 +88,20 @@ public class InventoryServiceImplementation implements InventoryService {
         String screenId = inventory.get(0).getScreenId();
         ScreenDto screen = theatreServiceClient.getScreenById(screenId);
 
+        // Fetch show details to get seat prices
+        ShowDto show = showServiceClient.getShowById(showId);
+        
+        // Create a price map: seatType -> price
+        Map<String, BigDecimal> priceMap = new HashMap<>();
+        if (show.getSeatPrices() != null && !show.getSeatPrices().isEmpty()) {
+            for (SeatPriceDto seatPrice : show.getSeatPrices()) {
+                priceMap.put(seatPrice.getSeatType(), seatPrice.getPrice());
+            }
+            log.info("Loaded {} seat prices for show: {}", priceMap.size(), showId);
+        } else {
+            log.warn("No seat prices found for show: {}, using default price", showId);
+        }
+
         Map<String, SeatDto> seatDetailsMap = screen.getSeats().stream()
                 .collect(Collectors.toMap(SeatDto::getId, seat -> seat));
 
@@ -94,13 +110,19 @@ public class InventoryServiceImplementation implements InventoryService {
         for (ShowSeatInventory inv : inventory) {
             SeatDto seatDetail = seatDetailsMap.get(inv.getSeatId());
             if (seatDetail != null) {
+                // Get price based on seat type, fallback to show's base price or zero
+                BigDecimal seatPrice = priceMap.getOrDefault(
+                    seatDetail.getSeatType(), 
+                    show.getPrice() != null ? show.getPrice() : BigDecimal.ZERO
+                );
+                
                 SeatInventoryDto dto = SeatInventoryDto.builder()
                         .seatId(inv.getSeatId())
                         .rowLabel(seatDetail.getRowLabel())
                         .seatNumber(seatDetail.getSeatNumber())
                         .seatType(seatDetail.getSeatType())
                         .status(inv.getStatus())
-                        .price(BigDecimal.ZERO)
+                        .price(seatPrice)
                         .displayRow(seatDetail.getDisplayRow())
                         .displayColumn(seatDetail.getDisplayColumn())
                         .active(seatDetail.getActive())

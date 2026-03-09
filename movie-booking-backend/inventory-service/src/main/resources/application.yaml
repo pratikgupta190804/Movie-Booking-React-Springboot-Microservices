@@ -97,3 +97,6 @@ feign:
 # Service URLs for OpenFeign clients
 theatre-service:
   url: ${THEATRE_SERVICE_URL:http://localhost:8083}
+
+show-service:
+  url: ${SHOW_SERVICE_URL:http://localhost:8084}
