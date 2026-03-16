@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
+    UserResponse registerUser(UserRegistrationRequest request);
+
     UserResponse syncUser(SyncUserRequest syncUserRequest);
 
     UserResponse getCurrentMe(String loggedInUser);

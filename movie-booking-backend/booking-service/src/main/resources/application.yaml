@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: booking-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/booking-db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Pratik@321}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+          jwk-set-uri: http://localhost:8181/realms/movie-booking-app/protocol/openid-connect/certs
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: booking-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.use.type.headers: false
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8086
+
+kafka:
+  topic:
+    booking-created: booking-created-event
+    booking-cancelled: booking-cancelled-event
+    payment-successful: payment-successful-event
+    payment-failed: payment-failed-event
+
+# Service URLs for Feign Clients
+movie-service:
+  url: ${MOVIE_SERVICE_URL:http://localhost:8082}
+
+show-service:
+  url: ${SHOW_SERVICE_URL:http://localhost:8084}
+
+theatre-service:
+  url: ${THEATRE_SERVICE_URL:http://localhost:8083}
+
+inventory-service:
+  url: ${INVENTORY_SERVICE_URL:http://localhost:8085}
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8081}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.moviebooking.booking: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    feign: DEBUG
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full

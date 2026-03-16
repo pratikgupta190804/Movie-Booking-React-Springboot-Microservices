@@ -19,6 +19,11 @@ public class UserController {
 
     private final UserService userService;
 
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRegistrationRequest request) {
+        return ResponseEntity.ok(userService.registerUser(request));
+    }
+
     @PostMapping("/sync")
     public ResponseEntity<UserResponse> syncUser(@Valid @RequestBody SyncUserRequest request) {
         return ResponseEntity.ok(userService.syncUser(request));

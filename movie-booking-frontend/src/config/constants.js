@@ -5,10 +5,11 @@ export const API_CONFIG = {
   THEATRE_SERVICE: "http://localhost:8083/api",
   SHOW_SERVICE: "http://localhost:8084/api",
   INVENTORY_SERVICE: "http://localhost:8085/api",
+  BOOKING_SERVICE: "http://localhost:8086/api",
   KEYCLOAK_URL: "http://localhost:8181",
   KEYCLOAK_REALM: "movie-booking-app",
   KEYCLOAK_CLIENT_ID: "movie-booking-client",
-  KEYCLOAK_CLIENT_SECRET: "RQBkKZJrfMeKZG9TNpao6AWNG7KZAEo9"
+  KEYCLOAK_CLIENT_SECRET: "RQBkKZJrfMeKZG9TNpao6AWNG7KZAEo9",
 };
 
 export const SEAT_STATUS = {

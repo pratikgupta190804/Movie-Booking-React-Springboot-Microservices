@@ -1,6 +1,7 @@
 package com.moviebooking.userservice.service.impl;
 
 import com.moviebooking.userservice.dtos.*;
+import com.moviebooking.userservice.model.Provider;
 import com.moviebooking.userservice.model.Role;
 import com.moviebooking.userservice.model.User;
 import com.moviebooking.userservice.exception.ForbiddenOperationException;
@@ -22,6 +23,44 @@ public class UserServiceImplementation implements UserService {
 
     private final UserRepository userRepository;
     private final KeycloakAdminService keycloakAdminService;
+
+    @Override
+    @Transactional
+    public UserResponse registerUser(UserRegistrationRequest request) {
+        log.info("Registering new user: {}", request.getUsername());
+
+        try {
+            // Create user in Keycloak
+            String userId = keycloakAdminService.createUser(
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    request.getUsername(), // firstName
+                    request.getUsername() // lastName
+            );
+
+            // Create user in local database
+            User user = new User();
+            user.setId(userId);
+            user.setEnabled(true);
+            user.setEmail(request.getEmail());
+            user.setUserName(request.getUsername());
+            user.setName(request.getUsername());
+            user.setProvider(Provider.LOCAL);
+            user.setProviderId(userId);
+            user.setRole(Role.CUSTOMER);
+
+            userRepository.save(user);
+
+            log.info("Successfully registered user: {} with ID: {}", request.getUsername(), userId);
+
+            return mapToResponse(user);
+
+        } catch (Exception e) {
+            log.error("Failed to register user: {}", request.getUsername(), e);
+            throw new RuntimeException("Registration failed: " + e.getMessage(), e);
+        }
+    }
 
     @Override
     public UserResponse syncUser(SyncUserRequest request) {

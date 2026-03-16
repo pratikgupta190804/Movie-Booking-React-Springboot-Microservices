@@ -3,7 +3,7 @@ import { API_CONFIG } from "../config/constants";
 import { setupInterceptors } from "./axiosInterceptors";
 
 const apiClient = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
+  baseURL: API_CONFIG.USER_SERVICE,
   headers: {
     "Content-Type": "application/json",
   },

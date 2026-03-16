@@ -34,6 +34,7 @@ export const authService = {
 
       return { token: access_token, user: userInfo };
     } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
       throw new Error(
         error.response?.data?.error_description || "Login failed",
       );
@@ -42,8 +43,8 @@ export const authService = {
 
   async register(userData) {
     try {
-      // For now, mock registration - in production, implement Keycloak user creation
-      const response = await apiClient.post("/auth/register", userData);
+      // Create user via user service registration endpoint
+      const response = await apiClient.post("/v1/users/register", userData);
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Registration failed");

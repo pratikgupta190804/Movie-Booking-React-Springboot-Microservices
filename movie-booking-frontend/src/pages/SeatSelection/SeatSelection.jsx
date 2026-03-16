@@ -10,6 +10,7 @@ import { inventoryService } from "../../services/inventoryService";
 import { showService } from "../../services/showService";
 import { movieService } from "../../services/movieService";
 import { theatreService } from "../../services/theatreService";
+import { bookingService } from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 import { LOCK_DURATION_MINUTES } from "../../config/constants";
 import toast from "react-hot-toast";
@@ -217,20 +218,71 @@ const SeatSelection = () => {
     }
   };
 
-  const handleProceedToPayment = () => {
-    // In production, integrate with payment gateway
-    // For now, navigate to confirmation
-    navigate(`/booking/confirmation/${showId}`, {
-      state: {
-        show,
-        movie,
-        theatre,
-        screenName: seatMapData?.screenName,
-        seats: selectedSeats,
-        lockData,
-        totalAmount,
-      },
-    });
+  const handleProceedToPayment = async () => {
+    try {
+      setLocking(true);
+
+      // Get user ID from authenticated user
+      const userId = user?.sub || user?.preferred_username || user?.email;
+
+      if (!userId) {
+        toast.error("User not authenticated. Please log in again.");
+        navigate("/login");
+        return;
+      }
+
+      // Prepare booking data
+      const bookingData = {
+        userId: userId,
+        showId: showId,
+        seats: selectedSeats.map((seat) => ({
+          seatId: seat.seatId,
+          seatNumber: `${seat.rowLabel}${seat.seatNumber}`,
+          rowNumber: seat.displayRow || 0,
+          seatNumberInRow: seat.displayColumn || seat.seatNumber,
+          seatType: seat.seatType,
+          price: parseFloat(seat.price || show?.price || 200),
+        })),
+        idempotencyKey: `${userId}-${showId}-${Date.now()}`,
+      };
+
+      console.log("Creating booking with data:", bookingData);
+
+      // Create booking in backend
+      const bookingResponse = await bookingService.createBooking(bookingData);
+
+      console.log("Booking created:", bookingResponse);
+
+      // Validate booking response
+      if (!bookingResponse || !bookingResponse.id) {
+        throw new Error("Invalid booking response - no booking ID received");
+      }
+
+      toast.success("Booking created successfully!");
+
+      // Navigate to confirmation with booking ID
+      navigate(`/booking/confirmation/${bookingResponse.id}`, {
+        state: {
+          bookingId: bookingResponse.id,
+          show,
+          movie,
+          theatre,
+          screenName: seatMapData?.screenName,
+          seats: selectedSeats,
+          lockData,
+          totalAmount: bookingResponse.totalAmount,
+          bookingReference: bookingResponse.bookingReference,
+        },
+      });
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to create booking. Please try again.",
+      );
+    } finally {
+      setLocking(false);
+    }
   };
 
   const formatTime = (seconds) => {
@@ -405,6 +457,7 @@ const SeatSelection = () => {
                           size="lg"
                           className="w-full"
                           onClick={handleProceedToPayment}
+                          loading={locking}
                         >
                           Proceed to Payment
                         </Button>

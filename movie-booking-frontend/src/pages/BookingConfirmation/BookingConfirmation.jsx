@@ -1,19 +1,108 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import { CheckCircle, Download, Calendar, MapPin, Clock } from "lucide-react";
 import { Card, CardBody } from "../../components/UI/Card";
 import { Button } from "../../components/UI/Button";
+import { Loader } from "../../components/UI/Loader";
+import { bookingService } from "../../services/bookingService";
+import { movieService } from "../../services/movieService";
+import { showService } from "../../services/showService";
+import { theatreService } from "../../services/theatreService";
+import toast from "react-hot-toast";
 
 const BookingConfirmation = () => {
   const { bookingId } = useParams();
   const location = useLocation();
-  const { show, seats, lockData, totalAmount } = location.state || {};
+  const [booking, setBooking] = useState(null);
+  const [movie, setMovie] = useState(null);
+  const [show, setShow] = useState(null);
+  const [theatre, setTheatre] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Get data from location state if available (for immediate display)
+  const stateData = location.state || {};
 
   useEffect(() => {
-    // In production, you would send payment success event to backend via Kafka
-    // This would trigger the confirmSeatsForBooking in inventory service
-    console.log("Booking confirmed:", { bookingId, lockData });
+    if (bookingId) {
+      fetchBookingDetails();
+    } else {
+      setLoading(false);
+      toast.error("No booking ID provided");
+    }
   }, [bookingId]);
+
+  const fetchBookingDetails = async () => {
+    try {
+      setLoading(true);
+
+      // Validate booking ID
+      if (!bookingId || bookingId === "undefined") {
+        throw new Error("Invalid booking ID");
+      }
+
+      // Fetch booking details from backend
+      const bookingData = await bookingService.getBookingById(bookingId);
+      setBooking(bookingData);
+
+      // Fetch related data (movie, show, theatre)
+      const [movieData, showData, theatreData] = await Promise.all([
+        movieService.getMovieById(bookingData.movieId).catch((err) => {
+          console.error("Error fetching movie:", err);
+          return stateData.movie || null;
+        }),
+        showService.getShowById(bookingData.showId).catch((err) => {
+          console.error("Error fetching show:", err);
+          return stateData.show || null;
+        }),
+        theatreService.getTheatreById(bookingData.theatreId).catch((err) => {
+          console.error("Error fetching theatre:", err);
+          return stateData.theatre || null;
+        }),
+      ]);
+
+      setMovie(movieData);
+      setShow(showData);
+      setTheatre(theatreData);
+    } catch (error) {
+      console.error("Error fetching booking details:", error);
+      toast.error("Failed to load booking details");
+
+      // Fallback to state data if available
+      if (stateData.bookingId) {
+        setBooking({
+          id: stateData.bookingId,
+          bookingReference: stateData.bookingReference,
+          totalAmount: stateData.totalAmount,
+          seats: stateData.seats,
+          status: "PENDING",
+        });
+        setMovie(stateData.movie);
+        setShow(stateData.show);
+        setTheatre(stateData.theatre);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loader fullScreen />;
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
+        <Card>
+          <CardBody className="text-center py-12">
+            <p className="text-xl text-primary-900 mb-4">Booking not found</p>
+            <Link to="/">
+              <Button variant="primary">Back to Home</Button>
+            </Link>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-primary-50 py-12">
@@ -37,13 +126,26 @@ const BookingConfirmation = () => {
             <div className="border-b border-primary-200 pb-4 mb-4">
               <div className="flex justify-between items-start mb-2">
                 <h2 className="text-2xl font-bold text-primary-900">
-                  {show?.movieTitle || "Movie Title"}
+                  {movie?.title || "Movie Title"}
                 </h2>
-                <span className="px-4 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                  CONFIRMED
+                <span
+                  className={`px-4 py-1 rounded-full text-sm font-semibold ${
+                    booking.status === "CONFIRMED"
+                      ? "bg-green-100 text-green-800"
+                      : booking.status === "PENDING"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {booking.status}
                 </span>
               </div>
-              <p className="text-primary-600">Booking ID: {bookingId}</p>
+              <p className="text-primary-600">
+                Booking Reference: {booking.bookingReference}
+              </p>
+              <p className="text-sm text-primary-500">
+                Booking ID: {booking.id}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -55,10 +157,10 @@ const BookingConfirmation = () => {
                     <span className="text-sm font-medium">Theatre</span>
                   </div>
                   <p className="font-semibold text-primary-900">
-                    {show?.theatreName || "Theatre Name"}
+                    {theatre?.name || "Theatre Name"}
                   </p>
                   <p className="text-sm text-primary-600">
-                    {show?.screenName || "Screen 1"}
+                    {stateData.screenName || "Screen 1"}
                   </p>
                 </div>
 
@@ -68,8 +170,8 @@ const BookingConfirmation = () => {
                     <span className="text-sm font-medium">Show Time</span>
                   </div>
                   <p className="font-semibold text-primary-900">
-                    {show?.showTime
-                      ? new Date(show.showTime).toLocaleDateString("en-US", {
+                    {show?.startTime
+                      ? new Date(show.startTime).toLocaleDateString("en-US", {
                           weekday: "long",
                           month: "long",
                           day: "numeric",
@@ -79,8 +181,8 @@ const BookingConfirmation = () => {
                   <div className="flex items-center gap-1 text-sm text-primary-600">
                     <Clock className="h-3 w-3" />
                     <span>
-                      {show?.showTime
-                        ? new Date(show.showTime).toLocaleTimeString("en-US", {
+                      {show?.startTime
+                        ? new Date(show.startTime).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
@@ -93,15 +195,14 @@ const BookingConfirmation = () => {
               {/* Seats */}
               <div className="border-t border-primary-200 pt-4">
                 <p className="text-sm font-medium text-primary-700 mb-2">
-                  Seats ({seats?.length || 0})
+                  Seats ({booking.seats?.length || 0})
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {seats?.map((seat) => (
+                  {booking.seats?.map((seat, index) => (
                     <span
-                      key={seat.seatId}
+                      key={seat.seatId || index}
                       className="px-4 py-2 bg-primary-100 text-primary-800 rounded-lg font-semibold"
                     >
-                      {seat.rowNumber}
                       {seat.seatNumber}
                     </span>
                   )) || <span className="text-primary-600">No seats</span>}
@@ -110,13 +211,34 @@ const BookingConfirmation = () => {
 
               {/* Payment Summary */}
               <div className="border-t border-primary-200 pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium text-primary-700">
-                    Total Amount Paid
-                  </span>
-                  <span className="text-2xl font-bold text-primary-900">
-                    ₹{totalAmount?.toFixed(2) || "0.00"}
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-primary-600">Subtotal</span>
+                    <span className="font-medium text-primary-900">
+                      ₹{booking.subtotal?.toFixed(2) || "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-primary-600">Convenience Fee</span>
+                    <span className="font-medium text-primary-900">
+                      ₹{booking.convenienceFee?.toFixed(2) || "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-primary-600">GST (18%)</span>
+                    <span className="font-medium text-primary-900">
+                      ₹{booking.gst?.toFixed(2) || "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-primary-200">
+                    <span className="text-lg font-medium text-primary-700">
+                      Total Amount{" "}
+                      {booking.status === "CONFIRMED" ? "Paid" : ""}
+                    </span>
+                    <span className="text-2xl font-bold text-primary-900">
+                      ₹{booking.totalAmount?.toFixed(2) || "0.00"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
