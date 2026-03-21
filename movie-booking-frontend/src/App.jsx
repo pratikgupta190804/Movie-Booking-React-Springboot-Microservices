@@ -1,3 +1,4 @@
+// src/App.jsx
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,6 +14,8 @@ import MovieDetail from "./pages/MovieDetail/MovieDetail";
 import ShowSelection from "./pages/ShowSelection/ShowSelection";
 import SeatSelection from "./pages/SeatSelection/SeatSelection";
 import BookingConfirmation from "./pages/BookingConfirmation/BookingConfirmation";
+import PaymentPage from "./pages/PaymentPage/PaymentPage";
+import PaymentHistory from "./pages/PaymentHistory/PaymentHistory";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -60,10 +63,26 @@ function App() {
               }
             />
             <Route
-              path="booking/confirmation/:bookingId"
+              path="booking/payment"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="booking/confirmation"
               element={
                 <ProtectedRoute>
                   <BookingConfirmation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="payment/history"
+              element={
+                <ProtectedRoute>
+                  <PaymentHistory />
                 </ProtectedRoute>
               }
             />

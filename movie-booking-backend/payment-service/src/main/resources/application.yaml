@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment-db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Pratik@321}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    group-id: payment-service-group
+    auto-offset-reset: earliest
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: "*"
+      # ── Tell deserializer exactly what class to use ────────────────
+      spring.json.value.default.type: com.moviebooking.payment.kafka.BookingCancelledEvent
+      spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: 8087
+
+kafka:
+  topic:
+    payment-initiated: payment-initiated-event
+    payment-successful: payment-successful-event
+    payment-failed: payment-failed-event
+
+payment:
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:rzp_test_STbDIkkUY3wCVj}
+    key-secret: ${RAZORPAY_KEY_SECRET:hJE1P7SBK71cxaCruFVJzh1z}
+  webhook:
+    secret: ${RAZORPAY_WEBHOOK_SECRET}
+
+# Service URLs for Feign Clients
+movie-service:
+  url: ${MOVIE_SERVICE_URL:http://localhost:8082}
+
+show-service:
+  url: ${SHOW_SERVICE_URL:http://localhost:8084}
+
+theatre-service:
+  url: ${THEATRE_SERVICE_URL:http://localhost:8083}
+
+inventory-service:
+  url: ${INVENTORY_SERVICE_URL:http://localhost:8085}
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8081}
+
+booking-service:
+  url: ${BOOKING_SERVICE_URL:http://localhost:8086}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.moviebooking.payment: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    feign: DEBUG
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic

@@ -27,6 +27,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(SeatsAlreadyLockedException.class)
+    public ResponseEntity<ErrorResponse> handleSeatsAlreadyLocaked(SeatsAlreadyLockedException ex) {
+        log.error("Seats Already Booked: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
         log.error("Unauthorized access: {}", ex.getMessage());

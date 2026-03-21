@@ -218,23 +218,35 @@ const SeatSelection = () => {
     }
   };
 
+  // Only these two functions changed — rest of your file stays the same
+
   const handleProceedToPayment = async () => {
     try {
       setLocking(true);
 
-      // Get user ID from authenticated user
       const userId = user?.sub || user?.preferred_username || user?.email;
-
       if (!userId) {
         toast.error("User not authenticated. Please log in again.");
         navigate("/login");
         return;
       }
 
-      // Prepare booking data
+      // ── Guard: check lock hasn't expired ──────────────────────────
+      if (lockData) {
+        const lockExpired = new Date(lockData.lockExpiresAt) < new Date();
+        if (lockExpired) {
+          toast.error("Seat lock has expired. Please select seats again.");
+          setLockData(null);
+          setSelectedSeats([]);
+          await fetchShowAndSeats();
+          return;
+        }
+      }
+
+      // ── Guard: finalAmount must exist ──────────────────────────────
       const bookingData = {
-        userId: userId,
-        showId: showId,
+        userId,
+        showId,
         seats: selectedSeats.map((seat) => ({
           seatId: seat.seatId,
           seatNumber: `${seat.rowLabel}${seat.seatNumber}`,
@@ -243,41 +255,51 @@ const SeatSelection = () => {
           seatType: seat.seatType,
           price: parseFloat(seat.price || show?.price || 200),
         })),
-        idempotencyKey: `${userId}-${showId}-${Date.now()}`,
+        idempotencyKey: crypto.randomUUID(), // ← fixed: proper UUID
       };
 
-      console.log("Creating booking with data:", bookingData);
-
-      // Create booking in backend
       const bookingResponse = await bookingService.createBooking(bookingData);
 
-      console.log("Booking created:", bookingResponse);
-
-      // Validate booking response
-      if (!bookingResponse || !bookingResponse.id) {
-        throw new Error("Invalid booking response - no booking ID received");
+      if (!bookingResponse?.id) {
+        throw new Error("Invalid booking response — no booking ID received");
       }
 
-      toast.success("Booking created successfully!");
+      // ── Guard: finalAmount must be present ─────────────────────────
+      if (!bookingResponse.finalAmount) {
+        throw new Error(
+          "Booking response missing finalAmount. Cannot proceed to payment.",
+        );
+      }
 
-      // Navigate to confirmation with booking ID
-      navigate(`/booking/confirmation/${bookingResponse.id}`, {
+      toast.success("Booking created! Proceeding to payment...");
+
+      navigate("/booking/payment", {
         state: {
-          bookingId: bookingResponse.id,
-          show,
-          movie,
-          theatre,
-          screenName: seatMapData?.screenName,
-          seats: selectedSeats,
-          lockData,
-          totalAmount: bookingResponse.totalAmount,
-          bookingReference: bookingResponse.bookingReference,
+          booking: {
+            ...bookingResponse,
+            // Enrich with local state since booking-service doesn't
+            // return movie/theatre name in create response
+            movieName: movie?.title || "—",
+            theatreName: theatre?.name || "—",
+            screenName: seatMapData?.screenName || "—",
+            seats: selectedSeats, // raw seats with rowLabel + seatNumber
+            showTime: show?.startTime,
+            expiryTime: lockData?.lockExpiresAt,
+            showId: showId, // needed for expiry redirect
+          },
+          userDetails: {
+            name: user?.name || user?.preferred_username || user?.email,
+            email: user?.email,
+            phone: user?.phone_number || "",
+          },
         },
+        replace: true,
       });
     } catch (error) {
       console.error("Error creating booking:", error);
       toast.error(
         error.response?.data?.message ||
+          error.message ||
           "Failed to create booking. Please try again.",
       );
     } finally {

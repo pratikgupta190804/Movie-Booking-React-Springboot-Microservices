@@ -13,6 +13,7 @@ import com.moviebooking.booking.entity.Booking;
 import com.moviebooking.booking.entity.BookingSeat;
 import com.moviebooking.booking.enums.BookingStatus;
 import com.moviebooking.booking.exception.BookingNotFoundException;
+import com.moviebooking.booking.exception.SeatsAlreadyLockedException;
 import com.moviebooking.booking.exception.UnauthorizedAccessException;
 import com.moviebooking.booking.repo.BookingRepository;
 import com.moviebooking.booking.service.BookingService;
@@ -41,11 +42,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponseDto createBooking(CreateBookingRequestDto request) {
-        log.info("Creating booking for user: {} and show: {}", request.getUserId(), request.getShowId());
+    public BookingResponseDto createBooking(CreateBookingRequestDto request, String userId) {
+        log.info("Creating booking for user: {} and show: {}", userId, request.getShowId());
 
         try {
-            // 1. Fetch show details
             ShowDto show = showServiceClient.getShowById(request.getShowId());
             
             // 2. Fetch movie details
@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
             // 4. Lock seats in inventory service
             SeatLockRequestDto lockRequest = new SeatLockRequestDto();
             lockRequest.setShowId(request.getShowId());
-            lockRequest.setUserId(request.getUserId());
+            lockRequest.setUserId(userId);
             lockRequest.setSeatIds(request.getSeats().stream()
                     .map(SeatBookingDto::getSeatId)
                     .collect(Collectors.toList()));
@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
             
             // 5. Create booking entity
             Booking booking = new Booking();
-            booking.setUserId(request.getUserId());
+            booking.setUserId(userId);
             booking.setShowId(request.getShowId());
             booking.setMovieId(show.getMovieId());
             booking.setTheatreId(show.getTheatreId());
@@ -116,7 +116,7 @@ public class BookingServiceImpl implements BookingService {
             
         } catch (Exception e) {
             log.error("Error creating booking: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to create booking: " + e.getMessage());
+            throw new SeatsAlreadyLockedException("Failed to create booking: " + e.getMessage());
         }
     }
 

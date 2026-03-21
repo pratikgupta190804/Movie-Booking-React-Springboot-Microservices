@@ -74,7 +74,7 @@ public class Booking {
     private BookingStatus status = BookingStatus.PENDING;
 
     private String paymentId;          // Reference to payment service
-    private String transactionId;       // Transaction ID from payment gateway
+    private String transactionId;
 
     private LocalDateTime bookingDate;
     private LocalDateTime expiryTime;   // When booking expires if not paid

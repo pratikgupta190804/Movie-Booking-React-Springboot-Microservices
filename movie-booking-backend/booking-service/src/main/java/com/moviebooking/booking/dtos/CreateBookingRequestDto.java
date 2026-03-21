@@ -10,9 +10,6 @@ import java.util.List;
 @Data
 public class CreateBookingRequestDto {
     
-    @NotBlank(message = "User ID is required")
-    private String userId;
-    
     @NotBlank(message = "Show ID is required")
     private String showId;
     
