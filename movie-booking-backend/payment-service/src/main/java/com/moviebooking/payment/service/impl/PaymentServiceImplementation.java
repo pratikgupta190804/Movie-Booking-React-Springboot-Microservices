@@ -28,6 +28,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,9 @@ public class PaymentServiceImplementation implements PaymentService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final WebhookSignatureVerifier webhookSignatureVerifier;  // ← add this
     private final ObjectMapper objectMapper;
+
+    @Value("${payment.razorpay.key-id}")
+    private String razorpayKeyId;
 
     @Override
     @Transactional
@@ -567,11 +571,11 @@ public class PaymentServiceImplementation implements PaymentService {
                 .paymentId(payment.getId())
                 .bookingId(payment.getBookingId())
                 .razorpayOrderId(payment.getProviderOrderId())
-                .razorpayKeyId(razorpayProperties.getKeyId())   // public key for frontend
+                .razorpayKeyId(razorpayKeyId)   // public key for frontend
                 .amount(payment.getAmount())
                 .currency(payment.getCurrency())
                 .status(payment.getStatus())
-                .message("Payment order created. Complete payment within 10 minutes.")
+                .message("Payment order created. Complete payment within 5 minutes.")
                 .build();
     }
 

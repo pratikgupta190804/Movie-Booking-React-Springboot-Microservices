@@ -54,7 +54,7 @@ payment:
     key-id: ${RAZORPAY_KEY_ID:rzp_test_STbDIkkUY3wCVj}
     key-secret: ${RAZORPAY_KEY_SECRET:hJE1P7SBK71cxaCruFVJzh1z}
   webhook:
-    secret: ${RAZORPAY_WEBHOOK_SECRET}
+    secret: ${RAZORPAY_WEBHOOK_SECRET:dummy-razorpay-webhook-secret-key}
 
 # Service URLs for Feign Clients
 movie-service:
