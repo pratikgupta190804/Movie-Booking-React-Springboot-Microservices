@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 public class PaymentSuccessEvent {
     private String bookingId;
     private String paymentId;
-    private String providerPaymentId;   // Razorpay payment ID
+    private String userId;              // ← add
+    private String showId;              // ← add
+    private String providerPaymentId;
     private BigDecimal amount;
     private LocalDateTime paidAt;
 }

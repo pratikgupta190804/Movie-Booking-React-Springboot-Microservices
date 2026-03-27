@@ -15,7 +15,7 @@ public class BookingEventListener {
 
     private final BookingService bookingService;
 
-    @KafkaListener(topics = "payment-successful-event", groupId = "booking-service")
+    @KafkaListener(topics = "payment-successful-event", groupId = "booking-service-v2")
     public void handlePaymentSuccess(PaymentSuccessfulEvent event) {
         log.info("Received PaymentSuccessfulEvent for booking: {}", event.getBookingId());
         try {
@@ -27,7 +27,7 @@ public class BookingEventListener {
         }
     }
 
-    @KafkaListener(topics = "payment-failed-event", groupId = "booking-service")
+    @KafkaListener(topics = "payment-failed-event", groupId = "booking-service-v2")
     public void handlePaymentFailed(PaymentFailedEvent event) {
         log.info("Received PaymentFailedEvent for booking: {}", event.getBookingId());
         try {

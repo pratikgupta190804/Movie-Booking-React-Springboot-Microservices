@@ -35,6 +35,9 @@ public class Payment {
     private String bookingId;
 
     @Column(nullable = false)
+    private String showId;
+
+    @Column(nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false, length = 3)

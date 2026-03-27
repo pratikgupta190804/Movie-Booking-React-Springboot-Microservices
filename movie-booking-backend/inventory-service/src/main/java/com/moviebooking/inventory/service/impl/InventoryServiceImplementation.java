@@ -205,13 +205,24 @@ public class InventoryServiceImplementation implements InventoryService {
     public void confirmSeatsForBooking(PaymentSuccessfulEvent event) {
         log.info("Confirming seats for booking: {}", event.getBookingId());
 
-        String userId = event.getUserId();
+        // ── Guard: validate required fields ───────────────────────────────
+        if (event.getUserId() == null || event.getShowId() == null) {
+            log.error("PaymentSuccessfulEvent missing userId or showId for booking: {}",
+                    event.getBookingId());
+            return;
+        }
 
+        // ── Find seats locked by this user for this specific show ──────────
         List<ShowSeatInventory> lockedSeats = inventoryRepository
-                .findByUserIdAndStatus(userId, SeatStatus.LOCKED);
+                .findByUserIdAndShowIdAndStatus(
+                        event.getUserId(),
+                        event.getShowId(),
+                        SeatStatus.LOCKED
+                );
 
         if (lockedSeats.isEmpty()) {
-            log.error("No locked seats found for user: {}", userId);
+            log.error("No locked seats found for user: {} and show: {}",
+                    event.getUserId(), event.getShowId());
             return;
         }
 
@@ -223,7 +234,6 @@ public class InventoryServiceImplementation implements InventoryService {
         }
 
         inventoryRepository.saveAll(lockedSeats);
-
         log.info("Confirmed {} seats for booking: {}", lockedSeats.size(), event.getBookingId());
     }
 

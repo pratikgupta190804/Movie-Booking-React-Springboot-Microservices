@@ -39,5 +39,7 @@ public interface ShowSeatInventoryRepository extends JpaRepository<ShowSeatInven
     long countByShowIdAndStatus(String showId, SeatStatus status);
 
     boolean existsByShowId(String showId);
+
+    List<ShowSeatInventory> findByUserIdAndShowIdAndStatus(String userId, String showId, SeatStatus seatStatus);
 }
 

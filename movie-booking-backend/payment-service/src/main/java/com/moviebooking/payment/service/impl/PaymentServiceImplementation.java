@@ -52,9 +52,6 @@ public class PaymentServiceImplementation implements PaymentService {
     private final WebhookSignatureVerifier webhookSignatureVerifier;  // ← add this
     private final ObjectMapper objectMapper;
 
-    @Value("${payment.razorpay.key-id}")
-    private String razorpayKeyId;
-
     @Override
     @Transactional
     public PaymentOrderResponseDto createPaymentOrder(PaymentOrderRequestDto request, String userId) {
@@ -84,6 +81,7 @@ public class PaymentServiceImplementation implements PaymentService {
         Payment payment = Payment.builder()
                 .userId(userId)
                 .bookingId(request.getBookingId())
+                .showId(booking.getShowId())
                 .amount(request.getAmount())
                 .currency(request.getCurrency().toUpperCase())
                 .status(PaymentStatus.CREATED)
@@ -531,13 +529,15 @@ public class PaymentServiceImplementation implements PaymentService {
         // Publish Kafka event → booking-service will confirm the booking
         PaymentSuccessEvent event = PaymentSuccessEvent.builder()
                 .bookingId(payment.getBookingId())
+                .userId(payment.getUserId())        // ← add
+                .showId(payment.getShowId())
                 .paymentId(payment.getId())
                 .providerPaymentId(request.getRazorpayPaymentId())
                 .amount(payment.getAmount())
                 .paidAt(payment.getCompletedAt())
                 .build();
 
-        kafkaTemplate.send("payment-success-event", payment.getBookingId(), event);
+        kafkaTemplate.send("payment-successful-event", payment.getBookingId(), event);
         log.info("Published PaymentSuccessEvent for booking: {}", payment.getBookingId());
 
         return mapToVerificationResponseDto(payment, true, "Payment verified successfully");
@@ -571,7 +571,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .paymentId(payment.getId())
                 .bookingId(payment.getBookingId())
                 .razorpayOrderId(payment.getProviderOrderId())
-                .razorpayKeyId(razorpayKeyId)   // public key for frontend
+                .razorpayKeyId(razorpayProperties.getKeyId())   // public key for frontend
                 .amount(payment.getAmount())
                 .currency(payment.getCurrency())
                 .status(payment.getStatus())
