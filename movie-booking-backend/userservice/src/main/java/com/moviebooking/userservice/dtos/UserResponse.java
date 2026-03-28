@@ -1,7 +1,5 @@
 package com.moviebooking.userservice.dtos;
 
-import com.moviebooking.userservice.model.Provider;
-import com.moviebooking.userservice.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

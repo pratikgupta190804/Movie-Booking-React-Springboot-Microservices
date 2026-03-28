@@ -19,6 +19,9 @@ import PaymentHistory from "./pages/PaymentHistory/PaymentHistory";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import MyTickets from "./pages/Ticket/MyTickets";
+import TicketDetail from "./pages/Ticket/TicketDetail";
+import TicketByBooking from "./pages/Ticket/TicketByBooking";
 
 function App() {
   return (
@@ -75,6 +78,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BookingConfirmation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="my-tickets"
+              element={
+                <ProtectedRoute>
+                  <MyTickets />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="ticket/:ticketId"
+              element={
+                <ProtectedRoute>
+                  <TicketDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="ticket/booking/:bookingId"
+              element={
+                <ProtectedRoute>
+                  <TicketByBooking />
                 </ProtectedRoute>
               }
             />

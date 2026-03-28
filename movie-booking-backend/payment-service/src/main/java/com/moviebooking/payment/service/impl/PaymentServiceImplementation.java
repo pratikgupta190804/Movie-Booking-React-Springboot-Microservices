@@ -28,7 +28,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -458,11 +457,6 @@ public class PaymentServiceImplementation implements PaymentService {
             );
         }
 
-        // Booking must not have expired
-        if (booking.getExpiryTime().isBefore(LocalDateTime.now())) {
-            throw new BookingValidationException("Booking has expired. Please create a new booking.");
-        }
-
         // Amount must match booking's finalAmount — prevent tampering
         if (requestedAmount.compareTo(booking.getFinalAmount()) != 0) {
             throw new BookingValidationException(
@@ -526,14 +520,32 @@ public class PaymentServiceImplementation implements PaymentService {
         payment.setCompletedAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
+        BookingResponseDto booking;
+        try {
+            booking = bookingServiceClient.getBookingById(payment.getBookingId());
+        } catch (Exception e) {
+            log.error("Failed to fetch booking: {}", payment.getBookingId(), e);
+            throw new BookingValidationException("Could not fetch booking details: " + payment.getBookingId());
+        }
+
+
         // Publish Kafka event → booking-service will confirm the booking
-        PaymentSuccessEvent event = PaymentSuccessEvent.builder()
+        PaymentSuccessfulEvent event = PaymentSuccessfulEvent.builder()
                 .bookingId(payment.getBookingId())
+                .paymentId(payment.getId())
                 .userId(payment.getUserId())        // ← add
                 .showId(payment.getShowId())
-                .paymentId(payment.getId())
                 .providerPaymentId(request.getRazorpayPaymentId())
-                .amount(payment.getAmount())
+                .movieName(booking.getMovieName())
+                .theatreName(booking.getTheatreName())
+                .screenName(booking.getScreenName())
+                .showTime(booking.getShowTime())
+                .bookingReference(booking.getBookingReference())
+                .totalTax(booking.getTotalTax())
+                .totalAmount(booking.getTotalAmount())
+                .convenienceFee(booking.getConvenienceFee())
+                .finalAmount(booking.getFinalAmount())
+                .status(booking.getStatus())
                 .paidAt(payment.getCompletedAt())
                 .build();
 
@@ -627,11 +639,11 @@ public class PaymentServiceImplementation implements PaymentService {
         paymentRepository.save(payment);
 
         // Publish success event
-        PaymentSuccessEvent event = PaymentSuccessEvent.builder()
+        PaymentSuccessfulEvent event = PaymentSuccessfulEvent.builder()
                 .bookingId(payment.getBookingId())
                 .paymentId(payment.getId())
                 .providerPaymentId(paymentData.getId())
-                .amount(payment.getAmount())
+                .totalAmount(payment.getAmount())
                 .paidAt(payment.getCompletedAt())
                 .build();
 

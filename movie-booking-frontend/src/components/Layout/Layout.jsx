@@ -36,6 +36,14 @@ const Layout = () => {
               >
                 Movies
               </Link>
+              {isAuthenticated && (
+                <Link
+                  to="/my-tickets"
+                  className="text-primary-700 hover:text-accent transition-colors font-medium"
+                >
+                  My Tickets
+                </Link>
+              )}
             </nav>
 
             {/* User Menu */}
@@ -107,6 +115,13 @@ const Layout = () => {
                 </Link>
                 {isAuthenticated ? (
                   <>
+                    <Link
+                      to="/my-tickets"
+                      className="text-primary-700 hover:text-accent transition-colors font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      My Tickets
+                    </Link>
                     <div className="flex items-center gap-2 text-primary-700">
                       <User className="h-5 w-5" />
                       <span className="font-medium">

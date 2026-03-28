@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: ticket-service
+
+  # MongoDB config
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/ticket-db
+      database: ticket-db
+
+  # Security
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8181/realms/movie-booking-app
+          jwk-set-uri: http://localhost:8181/realms/movie-booking-app/protocol/openid-connect/certs
+
+  # Kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ticket-service
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.moviebooking.ticket.dtos.PaymentSuccessfulEvent
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: 8088
+
+# Feign client URLs
+booking-service:
+  url: http://localhost:8086
+
+show-service:
+  url: http://localhost:8084
+
+movie-service:
+  url: http://localhost:8082
+
+theatre-service:
+  url: http://localhost:8083
+
+user-service:
+  url: http://localhost:8081
+
+# Disable Eureka
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.moviebooking.ticket: DEBUG
+    org.springframework.security: DEBUG

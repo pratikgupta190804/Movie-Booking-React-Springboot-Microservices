@@ -18,7 +18,8 @@ public class InventoryEventListener {
 
     @KafkaListener(
             topics = "show-created-event",
-            groupId = "inventory-service-v2"
+            groupId = "inventory-service-v2",
+            containerFactory = "showEventListenerFactory"
     )
     public void handleShowCreated(ShowCreatedEvent event) {
         log.info("Received ShowCreatedEvent for show: {}", event.getShowId());
@@ -31,7 +32,8 @@ public class InventoryEventListener {
 
     @KafkaListener(
             topics = "payment-successful-event",
-            groupId = "inventory-service-v2"
+            groupId = "inventory-service-v2",
+            containerFactory = "paymentEventListenerFactory"
             // ← no containerFactory needed
     )
     public void handlePaymentSuccess(PaymentSuccessfulEvent event) {
@@ -45,7 +47,8 @@ public class InventoryEventListener {
 
     @KafkaListener(
             topics = "payment-failed-event",
-            groupId = "inventory-service-v2"
+            groupId = "inventory-service-v2",
+            containerFactory = "paymentFailedListenerFactory"
     )
     public void handlePaymentFailed(PaymentFailedEvent event) {
         log.info("Received PaymentFailedEvent for user: {}", event.getUserId());

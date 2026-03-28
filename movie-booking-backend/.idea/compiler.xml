@@ -33,7 +33,7 @@
         <module name="inventory-service" />
         <module name="booking-service" />
       </profile>
-      <profile name="Annotation profile for theatre-service" enabled="true">
+      <profile name="Annotation profile for ticket-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -41,6 +41,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
         <module name="theatre-service" />
+        <module name="ticket-service" />
         <module name="payment-service" />
       </profile>
     </annotationProcessing>
@@ -60,6 +61,7 @@
       <module name="payment-service" options="-parameters" />
       <module name="show-service" options="-parameters" />
       <module name="theatre-service" options="-parameters" />
+      <module name="ticket-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
       <module name="userservice" options="-parameters" />
     </option>

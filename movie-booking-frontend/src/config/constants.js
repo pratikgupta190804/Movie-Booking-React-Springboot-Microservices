@@ -8,6 +8,7 @@ export const API_CONFIG = {
   INVENTORY_SERVICE: "http://localhost:8085/api",
   BOOKING_SERVICE:   "http://localhost:8086/api",
   PAYMENT_SERVICE:   "http://localhost:8087/api",
+  TICKET_SERVICE:    "http://localhost:8088/api",
   KEYCLOAK_URL:      "http://localhost:8181",
   KEYCLOAK_REALM:    "movie-booking-app",
   KEYCLOAK_CLIENT_ID:     "movie-booking-client",

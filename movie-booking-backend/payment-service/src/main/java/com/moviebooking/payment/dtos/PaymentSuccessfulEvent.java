@@ -1,5 +1,7 @@
-package com.moviebooking.payment.dtos.external;
+package com.moviebooking.payment.dtos;
 
+import com.moviebooking.payment.dtos.external.BookingSeatDto;
+import com.moviebooking.payment.dtos.external.BookingStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -10,14 +12,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingResponseDto {
-
-    private String id;
-    private String userId;
-    private String showId;
-    private String movieId;
-    private String theatreId;
-    private String screenId;
+@Builder
+public class PaymentSuccessfulEvent {
+    private String bookingId;
+    private String paymentId;
+    private String userId;              // ← add
+    private String showId;              // ← add
+    private String providerPaymentId;
     private String movieName;
     private String theatreName;
     private String screenName;
@@ -29,4 +30,5 @@ public class BookingResponseDto {
     private BigDecimal finalAmount;
     private BookingStatus status;
     private List<BookingSeatDto> seats;
+    private LocalDateTime paidAt;
 }
