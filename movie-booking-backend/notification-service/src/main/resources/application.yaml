@@ -20,7 +20,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: moviebookingapp0@gmail.com
-    password: gxoxtlwlghmkxcgr
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
