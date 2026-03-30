@@ -1,18 +1,20 @@
 // src/config/constants.js
+// src/config/constants.js
 export const API_CONFIG = {
-  BASE_URL:          "http://localhost:8080/api",
-  MOVIES_SERVICE:    "http://localhost:8082/api",
-  USER_SERVICE:      "http://localhost:8081/api",
-  THEATRE_SERVICE:   "http://localhost:8083/api",
-  SHOW_SERVICE:      "http://localhost:8084/api",
-  INVENTORY_SERVICE: "http://localhost:8085/api",
-  BOOKING_SERVICE:   "http://localhost:8086/api",
-  PAYMENT_SERVICE:   "http://localhost:8087/api",
-  TICKET_SERVICE:    "http://localhost:8088/api",
-  KEYCLOAK_URL:      "http://localhost:8181",
-  KEYCLOAK_REALM:    "movie-booking-app",
-  KEYCLOAK_CLIENT_ID:     "movie-booking-client",
-  KEYCLOAK_CLIENT_SECRET: "RQBkKZJrfMeKZG9TNpao6AWNG7KZAEo9",
+  BASE_URL:          import.meta.env.VITE_GATEWAY_URL,
+  MOVIES_SERVICE:    import.meta.env.VITE_GATEWAY_URL,
+  USER_SERVICE:      import.meta.env.VITE_GATEWAY_URL,
+  THEATRE_SERVICE:   import.meta.env.VITE_GATEWAY_URL,
+  SHOW_SERVICE:      import.meta.env.VITE_GATEWAY_URL,
+  INVENTORY_SERVICE: import.meta.env.VITE_GATEWAY_URL,
+  BOOKING_SERVICE:   import.meta.env.VITE_GATEWAY_URL,
+  PAYMENT_SERVICE:   import.meta.env.VITE_GATEWAY_URL,
+  TICKET_SERVICE:    import.meta.env.VITE_GATEWAY_URL,
+
+  KEYCLOAK_URL:           import.meta.env.VITE_KEYCLOAK_URL,
+  KEYCLOAK_REALM:         import.meta.env.VITE_KEYCLOAK_REALM,
+  KEYCLOAK_CLIENT_ID:     import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+  KEYCLOAK_CLIENT_SECRET: import.meta.env.VITE_KEYCLOAK_CLIENT_SECRET,
 };
 
 export const SEAT_STATUS = {

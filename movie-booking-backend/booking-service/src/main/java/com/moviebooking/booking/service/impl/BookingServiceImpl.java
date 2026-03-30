@@ -1,20 +1,13 @@
 package com.moviebooking.booking.service.impl;
 
-import com.moviebooking.booking.client.InventoryServiceClient;
-import com.moviebooking.booking.client.MovieServiceClient;
-import com.moviebooking.booking.client.ShowServiceClient;
-import com.moviebooking.booking.client.TheatreServiceClient;
+import com.moviebooking.booking.client.*;
 import com.moviebooking.booking.dtos.*;
-import com.moviebooking.booking.dtos.external.MovieDto;
-import com.moviebooking.booking.dtos.external.ScreenDto;
-import com.moviebooking.booking.dtos.external.ShowDto;
-import com.moviebooking.booking.dtos.external.TheatreDto;
+import com.moviebooking.booking.dtos.external.*;
 import com.moviebooking.booking.entity.Booking;
 import com.moviebooking.booking.entity.BookingSeat;
 import com.moviebooking.booking.enums.BookingStatus;
 import com.moviebooking.booking.exception.BookingNotFoundException;
 import com.moviebooking.booking.exception.SeatsAlreadyLockedException;
-import com.moviebooking.booking.exception.UnauthorizedAccessException;
 import com.moviebooking.booking.repo.BookingRepository;
 import com.moviebooking.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
@@ -123,11 +116,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingById(String bookingId, String userId) {
         log.info("Fetching booking: {} for user: {}", bookingId, userId);
-        
+
         Booking booking = bookingRepository.findByIdAndUserId(bookingId, userId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking not found with ID: " + bookingId));
         
-        return mapToResponseDto(booking, null);
+        BookingResponseDto responseDto = mapToResponseDto(booking, null);
+        return responseDto;
     }
 
     @Override

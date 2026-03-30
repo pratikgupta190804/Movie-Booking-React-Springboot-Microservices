@@ -4,6 +4,32 @@ import { API_CONFIG } from "../config/constants";
 
 export const authService = {
   // Keycloak authentication
+
+  // authService.js
+  async syncUserToDatabase(userInfo, token) {
+    try {
+      await axios.post(
+        `${API_CONFIG.USER_SERVICE}/v1/users/sync`,
+        {
+          keycloakId: userInfo.sub,
+          email: userInfo.email,
+          username: userInfo.preferred_username,
+          name: userInfo.given_name + " " + userInfo.family_name,
+          provider: "GOOGLE",
+          providerId: "2",
+          role: "CUSTOMER",
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      console.info("User synced to database");
+    } catch (error) {
+      // Non-critical — don't fail login if sync fails
+      console.warn("User sync failed:", error.message);
+    }
+  },
+
   async login(username, password) {
     try {
       const params = new URLSearchParams();

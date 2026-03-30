@@ -19,4 +19,5 @@ public interface UserService {
     UserResponse updateProfile(UserUpdateDto updateDto, String loggedInUser);
 
     void disableProfile(String userId, String loggedInUser);
+
 }

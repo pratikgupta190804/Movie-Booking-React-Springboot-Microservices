@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import MyTickets from "./pages/Ticket/MyTickets";
 import TicketDetail from "./pages/Ticket/TicketDetail";
 import TicketByBooking from "./pages/Ticket/TicketByBooking";
+import AuthCallback from "./pages/Auth/AuthCallback";
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           }}
         />
         <Routes>
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Layout />}>

@@ -46,6 +46,14 @@ public class UserController {
         );
     }
 
+    @GetMapping("/internal/{id}")
+    public ResponseEntity<UserResponse> getUserByIdInternal(
+            @PathVariable String id) {
+        return ResponseEntity.ok(
+                userService.getUserById(id)
+        );
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllUsers(

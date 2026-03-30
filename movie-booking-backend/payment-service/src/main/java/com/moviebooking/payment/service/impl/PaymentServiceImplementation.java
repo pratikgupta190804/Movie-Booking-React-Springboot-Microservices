@@ -533,7 +533,7 @@ public class PaymentServiceImplementation implements PaymentService {
         PaymentSuccessfulEvent event = PaymentSuccessfulEvent.builder()
                 .bookingId(payment.getBookingId())
                 .paymentId(payment.getId())
-                .userId(payment.getUserId())        // ← add
+                .userId(payment.getUserId()) // ← add
                 .showId(payment.getShowId())
                 .providerPaymentId(request.getRazorpayPaymentId())
                 .movieName(booking.getMovieName())
