@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { authService } from "../services/authService";
 import toast from "react-hot-toast";
 import { API_CONFIG } from "../config/constants";
@@ -106,6 +106,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Compute user roles from JWT token
+  const userRoles = useMemo(() => {
+    if (!user) return [];
+
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const decoded = parseJwt(token);
+        if (decoded.realm_access?.roles) {
+          return decoded.realm_access.roles.map((role) => role.toUpperCase());
+        }
+      } catch (e) {
+        console.warn("Failed to decode JWT token");
+      }
+    }
+
+    // Fallback: try resource access if available
+    if (user.resource_access) {
+      const roles = [];
+      Object.values(user.resource_access).forEach((resource) => {
+        if (resource.roles) {
+          roles.push(...resource.roles);
+        }
+      });
+      return roles.map((role) => role.toUpperCase());
+    }
+
+    return [];
+  }, [user]);
+
+  const hasRole = (role) => {
+    return userRoles.includes(role.toUpperCase());
+  };
+
+  const hasAnyRole = (roles) => {
+    const roleArray = Array.isArray(roles) ? roles : [roles];
+    return roleArray.some((role) => userRoles.includes(role.toUpperCase()));
+  };
+
   const value = {
     user,
     loading,
@@ -114,6 +153,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     handleOAuthCallback,
     isAuthenticated: !!user,
+    userRoles,
+    hasRole,
+    hasAnyRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

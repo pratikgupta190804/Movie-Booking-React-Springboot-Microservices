@@ -14,8 +14,21 @@ setupInterceptors(showClient);
 
 export const showService = {
   async getAllShows() {
-    const response = await showClient.get("/shows");
-    return response.data;
+    // Since there's no getAllShows endpoint, use date-range with a wide range
+    const startDate = new Date("2000-01-01").toISOString();
+    const endDate = new Date("2099-12-31").toISOString();
+    try {
+      const response = await showClient.get("/shows/date-range", {
+        params: {
+          startDate,
+          endDate,
+        },
+      });
+      return response.data || [];
+    } catch (error) {
+      console.warn("Could not fetch shows by date range:", error);
+      return [];
+    }
   },
 
   async getShowById(showId) {
@@ -30,18 +43,16 @@ export const showService = {
 
   async getShowsByTheatre(theatreId) {
     const response = await showClient.get(`/shows/theatre/${theatreId}`);
-    return response.data;
+    return response.data || [];
   },
 
-  async getShowsByMovieAndCity(movieId, city) {
+  async getShowsByMovieAndTheatre(movieId, theatreId, date = null) {
     const response = await showClient.get(
-      `/shows/movie/${movieId}/city/${city}`,
+      `/shows/movie/${movieId}/theatre/${theatreId}`,
+      {
+        params: date ? { date } : {},
+      },
     );
-    return response.data;
-  },
-
-  async getShowsByDate(date) {
-    const response = await showClient.get(`/shows/date/${date}`);
-    return response.data;
+    return response.data || [];
   },
 };

@@ -1,0 +1,165 @@
+import { useState } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import {
+  Building2,
+  BarChart3,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Plus,
+  List,
+  TrendingUp,
+  Ticket,
+} from "lucide-react";
+import { Button } from "../../components/UI/Button";
+
+const TheatreOwnerDashboard = () => {
+  const { logout, user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const menuItems = [
+    {
+      icon: BarChart3,
+      label: "Dashboard",
+      path: "/theatre/dashboard",
+      badge: null,
+    },
+    {
+      icon: Plus,
+      label: "Create Theatre",
+      path: "/theatre/create",
+      badge: "New",
+    },
+    {
+      icon: List,
+      label: "My Theatres",
+      path: "/theatre/my-theatres",
+      badge: null,
+    },
+    {
+      icon: Plus,
+      label: "Add Show",
+      path: "/theatre/shows/create",
+      badge: null,
+    },
+    {
+      icon: Ticket,
+      label: "Manage Shows",
+      path: "/theatre/shows",
+      badge: null,
+    },
+    {
+      icon: TrendingUp,
+      label: "Revenue & Analytics",
+      path: "/theatre/analytics",
+      badge: null,
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      path: "/theatre/settings",
+      badge: null,
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+      <div className="flex h-screen overflow-hidden">
+        {/* Sidebar */}
+        <aside
+          className={`${
+            sidebarOpen ? "w-64" : "w-20"
+          } bg-slate-900 border-r border-slate-700 transition-all duration-300 flex flex-col`}
+        >
+          {/* Sidebar Header */}
+          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            {sidebarOpen && (
+              <div className="flex items-center gap-2">
+                <Building2 className="w-6 h-6 text-purple-500" />
+                <span className="font-bold text-white text-lg">Theatre</span>
+              </div>
+            )}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1 hover:bg-slate-800 rounded transition-colors"
+            >
+              {sidebarOpen ? (
+                <X className="w-5 h-5 text-slate-400" />
+              ) : (
+                <Menu className="w-5 h-5 text-slate-400" />
+              )}
+            </button>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white relative group"
+                  title={!sidebarOpen ? item.label : ""}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {sidebarOpen && (
+                    <>
+                      <span className="font-medium">{item.label}</span>
+                      {item.badge && (
+                        <span className="ml-auto px-2 py-1 bg-purple-600 text-xs font-bold text-white rounded">
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {!sidebarOpen && item.badge && (
+                    <span className="absolute -right-2 -top-2 w-2 h-2 bg-purple-500 rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="p-4 border-t border-slate-700">
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600/20 transition-colors text-slate-300 hover:text-red-400"
+            >
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="font-medium">Logout</span>}
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Bar */}
+          <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-white">
+              Theatre Owner Dashboard
+            </h1>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm text-slate-400">Logged in as</p>
+                <p className="font-semibold text-white">
+                  {user?.preferred_username || "Theatre Owner"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default TheatreOwnerDashboard;

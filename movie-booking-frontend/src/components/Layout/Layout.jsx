@@ -1,11 +1,11 @@
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Film, User, LogOut, Menu, X } from "lucide-react";
+import { Film, User, LogOut, Menu, X, LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../UI/Button";
 
 const Layout = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, hasRole } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -42,6 +42,24 @@ const Layout = () => {
                   className="text-primary-700 hover:text-accent transition-colors font-medium"
                 >
                   My Tickets
+                </Link>
+              )}
+              {isAuthenticated && hasRole("ADMIN") && (
+                <Link
+                  to="/admin/dashboard"
+                  className="text-primary-700 hover:text-accent transition-colors font-medium flex items-center gap-1"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Admin Panel
+                </Link>
+              )}
+              {isAuthenticated && hasRole("THEATRE_OWNER") && (
+                <Link
+                  to="/theatre/dashboard"
+                  className="text-primary-700 hover:text-accent transition-colors font-medium flex items-center gap-1"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Dashboard
                 </Link>
               )}
             </nav>
@@ -122,6 +140,26 @@ const Layout = () => {
                     >
                       My Tickets
                     </Link>
+                    {hasRole("ADMIN") && (
+                      <Link
+                        to="/admin/dashboard"
+                        className="text-primary-700 hover:text-accent transition-colors font-medium flex items-center gap-1"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <LayoutGrid className="h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    )}
+                    {hasRole("THEATRE_OWNER") && (
+                      <Link
+                        to="/theatre/dashboard"
+                        className="text-primary-700 hover:text-accent transition-colors font-medium flex items-center gap-1"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <LayoutGrid className="h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    )}
                     <div className="flex items-center gap-2 text-primary-700">
                       <User className="h-5 w-5" />
                       <span className="font-medium">

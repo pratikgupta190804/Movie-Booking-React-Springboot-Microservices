@@ -14,7 +14,8 @@ setupInterceptors(movieClient);
 
 export const movieService = {
   async getAllMovies() {
-    const response = await movieClient.get("/movies");
+    // Get all active movies using status endpoint since getAllMovies doesn't exist
+    const response = await movieClient.get("/movies/status/NOW_SHOWING");
     return response.data;
   },
 
@@ -63,6 +64,38 @@ export const movieService = {
         params: { status },
       },
     );
+    return response.data;
+  },
+
+  // Genre endpoints
+  async getAllGenres() {
+    const response = await movieClient.get("/genres");
+    return response.data;
+  },
+
+  async getGenreById(genreId) {
+    const response = await movieClient.get(`/genres/${genreId}`);
+    return response.data;
+  },
+
+  async createGenre(genreName) {
+    const response = await movieClient.post("/genres", { name: genreName });
+    return response.data;
+  },
+
+  // Actor endpoints
+  async getAllActors() {
+    const response = await movieClient.get("/actors");
+    return response.data;
+  },
+
+  async getActorById(actorId) {
+    const response = await movieClient.get(`/actors/${actorId}`);
+    return response.data;
+  },
+
+  async createActor(actorData) {
+    const response = await movieClient.post("/actors", actorData);
     return response.data;
   },
 };

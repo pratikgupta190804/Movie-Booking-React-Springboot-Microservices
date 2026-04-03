@@ -23,6 +23,17 @@ import MyTickets from "./pages/Ticket/MyTickets";
 import TicketDetail from "./pages/Ticket/TicketDetail";
 import TicketByBooking from "./pages/Ticket/TicketByBooking";
 import AuthCallback from "./pages/Auth/AuthCallback";
+import CreateMovie from "./pages/Admin/CreateMovie";
+import CreateTheatre from "./pages/TheatreOwner/CreateTheatre";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminDashboardHome from "./pages/Admin/AdminDashboardHome";
+import TheatreOwnerDashboard from "./pages/TheatreOwner/TheatreOwnerDashboard";
+import TheatreOwnerDashboardHome from "./pages/TheatreOwner/TheatreOwnerDashboardHome";
+import ManageMovies from "./pages/Admin/ManageMovies";
+import ManageGenres from "./pages/Admin/ManageGenres";
+import ManageActors from "./pages/Admin/ManageActors";
+import CreateShow from "./pages/TheatreOwner/CreateShow";
+import ManageShows from "./pages/TheatreOwner/ManageShows";
 
 function App() {
   return (
@@ -117,6 +128,48 @@ function App() {
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
+
+          {/* Admin Dashboard Routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute requiredRoles="ADMIN">
+                <Routes>
+                  <Route path="dashboard" element={<AdminDashboard />}>
+                    <Route index element={<AdminDashboardHome />} />
+                    <Route path="movies/create" element={<CreateMovie />} />
+                    <Route path="movies" element={<ManageMovies />} />
+                    <Route path="genres" element={<ManageGenres />} />
+                    <Route path="actors" element={<ManageActors />} />
+                  </Route>
+                  <Route path="movies/create" element={<CreateMovie />} />
+                  <Route path="movies" element={<ManageMovies />} />
+                  <Route path="genres" element={<ManageGenres />} />
+                  <Route path="actors" element={<ManageActors />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Theatre Owner Dashboard Routes */}
+          <Route
+            path="/theatre/*"
+            element={
+              <ProtectedRoute requiredRoles="THEATRE_OWNER">
+                <Routes>
+                  <Route path="dashboard" element={<TheatreOwnerDashboard />}>
+                    <Route index element={<TheatreOwnerDashboardHome />} />
+                    <Route path="create" element={<CreateTheatre />} />
+                    <Route path="shows/create" element={<CreateShow />} />
+                    <Route path="shows" element={<ManageShows />} />
+                  </Route>
+                  <Route path="create" element={<CreateTheatre />} />
+                  <Route path="shows/create" element={<CreateShow />} />
+                  <Route path="shows" element={<ManageShows />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>
