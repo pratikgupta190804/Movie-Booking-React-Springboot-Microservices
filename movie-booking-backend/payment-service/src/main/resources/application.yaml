@@ -51,8 +51,8 @@ kafka:
 
 razorpay:
   key:
-    id: ${RAZORPAY_KEY_ID:rzp_test_STbDIkkUY3wCVj}
-    secret: ${RAZORPAY_KEY_SECRET:hJE1P7SBK71cxaCruFVJzh1z}
+    id: ${RAZORPAY_KEY_ID}
+    secret: ${RAZORPAY_KEY_SECRET}
   webhook:
     secret: ${RAZORPAY_WEBHOOK_SECRET:dummy-razorpay-webhook-secret-key}
 
