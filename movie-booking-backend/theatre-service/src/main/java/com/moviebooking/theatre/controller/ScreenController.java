@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,9 @@ public class ScreenController {
     public ResponseEntity<ScreenResponseDto> createScreen(
             @PathVariable String theatreId,
             @Valid @RequestBody ScreenLayoutRequestDto requestDto,
-            @RequestHeader("X-User-Id") String ownerId) {
+            @AuthenticationPrincipal Jwt jwt) {
 
+        String ownerId = jwt.getSubject();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(screenService.createScreenWithLayout(theatreId, requestDto, ownerId));
     }
@@ -35,8 +38,9 @@ public class ScreenController {
     public ResponseEntity<ScreenResponseDto> updateScreen(
             @PathVariable String screenId,
             @Valid @RequestBody ScreenLayoutRequestDto requestDto,
-            @RequestHeader("X-User-Id") String ownerId) {
+            @AuthenticationPrincipal Jwt jwt) {
 
+        String ownerId = jwt.getSubject();
         return ResponseEntity.ok(
                 screenService.updateScreenLayout(screenId, requestDto, ownerId));
     }

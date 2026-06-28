@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Users, AlertCircle, Loader } from "lucide-react";
 import { Button } from "../../components/UI/Button";
 import { showService } from "../../services/showService";
 import { theatreService } from "../../services/theatreService";
+import { movieService } from "../../services/movieService";
 import toast from "react-hot-toast";
 
 const CreateShow = () => {
   const navigate = useNavigate();
   const [theatres, setTheatres] = useState([]);
   const [movies, setMovies] = useState([]);
+  const [screens, setScreens] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
+  const [loadingScreens, setLoadingScreens] = useState(false);
 
   const [formData, setFormData] = useState({
     movieId: "",
@@ -24,17 +27,17 @@ const CreateShow = () => {
     format: "2D",
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         setFetchingData(true);
         // Fetch theatres and movies for dropdowns
         const [theatresRes, moviesRes] = await Promise.all([
           theatreService.getAllTheatres().catch(() => []),
-          // Note: You might need to import movieService
+          movieService.getAllMovies().catch(() => []),
         ]);
         setTheatres(Array.isArray(theatresRes) ? theatresRes : []);
-        // setMovies(Array.isArray(moviesRes) ? moviesRes : []);
+        setMovies(Array.isArray(moviesRes) ? moviesRes : []);
         setFetchingData(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -44,6 +47,28 @@ const CreateShow = () => {
     };
     fetchData();
   }, []);
+
+  // Fetch screens when theatre changes
+  useEffect(() => {
+    const fetchScreens = async () => {
+      if (!formData.theatreId) {
+        setScreens([]);
+        setFormData((prev) => ({ ...prev, screenId: "" }));
+        return;
+      }
+      try {
+        setLoadingScreens(true);
+        const screensRes = await theatreService.getScreensByTheatre(formData.theatreId);
+        setScreens(Array.isArray(screensRes) ? screensRes : []);
+      } catch (error) {
+        console.error("Error fetching screens:", error);
+        toast.error("Failed to load screens for the selected theatre");
+      } finally {
+        setLoadingScreens(false);
+      }
+    };
+    fetchScreens();
+  }, [formData.theatreId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,23 +94,45 @@ const CreateShow = () => {
 
     setLoading(true);
     try {
+      // Calculate start and end times
+      const startTime = `${formData.showDate}T${formData.showTime}:00`;
+      const selectedMovie = movies.find((m) => String(m.id) === String(formData.movieId));
+      const durationMin = selectedMovie ? parseInt(selectedMovie.duration) : 120;
+      
+      const start = new Date(startTime);
+      const end = new Date(start.getTime() + durationMin * 60 * 1000);
+      
+      const pad = (num) => String(num).padStart(2, "0");
+      const endTime = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(
+        end.getDate()
+      )}T${pad(end.getHours())}:${pad(end.getMinutes())}:${pad(end.getSeconds())}`;
+
+      const basePrice = parseFloat(formData.price) || 200;
+
       const showPayload = {
-        movieId: parseInt(formData.movieId),
-        screenId: parseInt(formData.screenId),
-        showDate: formData.showDate,
-        showTime: formData.showTime,
-        price: parseFloat(formData.price) || 0,
-        language: formData.language || "English",
-        format: formData.format,
+        movieId: String(formData.movieId),
+        theatreId: String(formData.theatreId),
+        screenId: String(formData.screenId),
+        language: formData.language || (selectedMovie?.language || "English"),
+        startTime,
+        endTime,
+        price: basePrice,
+        seatPrices: [
+          { rowLabel: "A", seatType: "REGULAR", price: basePrice },
+          { rowLabel: "B", seatType: "REGULAR", price: basePrice },
+          { rowLabel: "C", seatType: "REGULAR", price: basePrice },
+          { rowLabel: "D", seatType: "PREMIUM", price: basePrice + 50 },
+          { rowLabel: "E", seatType: "RECLINER", price: basePrice + 150 },
+        ],
       };
 
-      // Note: Update this with actual create show endpoint
-      // await showService.createShow(showPayload);
+      await showService.createShow(showPayload);
       toast.success("Show created successfully!");
       navigate("/theatre/shows");
     } catch (error) {
       console.error("Error creating show:", error);
-      toast.error("Failed to create show");
+      const errorMsg = error.response?.data?.message || "Failed to create show";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -133,14 +180,26 @@ const CreateShow = () => {
             <label className="block text-sm font-medium text-white mb-2">
               Screen *
             </label>
-            <input
-              type="number"
+            <select
               name="screenId"
               value={formData.screenId}
               onChange={handleChange}
-              placeholder="Enter screen number"
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
-            />
+              disabled={!formData.theatreId || loadingScreens}
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500 disabled:opacity-50"
+            >
+              <option value="">
+                {loadingScreens
+                  ? "Loading screens..."
+                  : !formData.theatreId
+                  ? "Select a theatre first"
+                  : "Select Screen"}
+              </option>
+              {screens.map((screen) => (
+                <option key={screen.id} value={screen.id}>
+                  {screen.name} ({screen.seatingCapacity} seats)
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Movie Selection */}
@@ -148,14 +207,19 @@ const CreateShow = () => {
             <label className="block text-sm font-medium text-white mb-2">
               Movie *
             </label>
-            <input
-              type="number"
+            <select
               name="movieId"
               value={formData.movieId}
               onChange={handleChange}
-              placeholder="Enter movie ID"
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
-            />
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
+            >
+              <option value="">Select Movie</option>
+              {movies.map((movie) => (
+                <option key={movie.id} value={movie.id}>
+                  {movie.title} ({movie.language || "N/A"})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Show Date & Time */}
@@ -211,6 +275,7 @@ const CreateShow = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
               >
+                <option value="">Select Language</option>
                 <option value="English">English</option>
                 <option value="Hindi">Hindi</option>
                 <option value="Tamil">Tamil</option>

@@ -44,8 +44,7 @@ const ManageShows = () => {
     }
 
     try {
-      // Note: Add delete method to showService
-      // await showService.deleteShow(showId);
+      await showService.deleteShow(showId);
       toast.success("Show deleted successfully!");
       setShows(shows.filter((show) => show.id !== showId));
     } catch (error) {

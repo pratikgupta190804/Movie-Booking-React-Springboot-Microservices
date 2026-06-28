@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,8 +25,9 @@ public class TheatreController {
     @PreAuthorize("hasRole('THEATRE_OWNER')")
     public ResponseEntity<TheatreResponseDto> createTheatre(
             @RequestBody TheatreRequestDto requestDto,
-            @RequestHeader("X-User-Id") String ownerId
+            @AuthenticationPrincipal Jwt jwt
     ) {
+        String ownerId = jwt.getSubject();
         return ResponseEntity.ok(
                 theatreService.createTheatre(requestDto, ownerId)
         );
@@ -35,8 +38,9 @@ public class TheatreController {
     public ResponseEntity<TheatreResponseDto> updateTheatre(
             @PathVariable String theatreId,
             @RequestBody TheatreUpdateDto updateDto,
-            @RequestHeader("X-User-Id") String ownerId
+            @AuthenticationPrincipal Jwt jwt
     ) {
+        String ownerId = jwt.getSubject();
         return ResponseEntity.ok(
                 theatreService.updateTheatre(theatreId, updateDto, ownerId)
         );
@@ -46,8 +50,9 @@ public class TheatreController {
     @PreAuthorize("hasRole('THEATRE_OWNER')")
     public ResponseEntity<TheatreResponseDto> activateTheatre(
             @PathVariable String theatreId,
-            @RequestHeader("X-User-Id") String ownerId
+            @AuthenticationPrincipal Jwt jwt
     ) {
+        String ownerId = jwt.getSubject();
         return ResponseEntity.ok(
                 theatreService.activateTheatre(theatreId, ownerId)
         );
@@ -57,8 +62,9 @@ public class TheatreController {
     @PreAuthorize("hasRole('THEATRE_OWNER')")
     public ResponseEntity<Void> deactivateTheatre(
             @PathVariable String theatreId,
-            @RequestHeader("X-User-Id") String ownerId
+            @AuthenticationPrincipal Jwt jwt
     ) {
+        String ownerId = jwt.getSubject();
         theatreService.deactivateTheatre(theatreId, ownerId);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Film, AlertCircle, Loader } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { movieService } from "../../services/movieService";
@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 
 const CreateMovie = () => {
   const navigate = useNavigate();
+  const { movieId } = useParams();
+  const isEditMode = !!movieId;
   const { hasRole, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
@@ -36,25 +38,44 @@ const CreateMovie = () => {
     }
   }, [authLoading, hasRole, navigate]);
 
-  // Load genres and actors
+  // Load genres, actors, and movie details if editing
   useEffect(() => {
     const loadData = async () => {
       try {
         const [genreList, actorList] = await Promise.all([
-          movieService.getAllGenres(),
-          movieService.getAllActors(),
+          movieService.getAllGenres().catch(() => []),
+          movieService.getAllActors().catch(() => []),
         ]);
         setGenres(genreList || []);
         setActors(actorList || []);
+
+        if (isEditMode) {
+          const movieData = await movieService.getMovieById(movieId);
+          if (movieData) {
+            setFormData({
+              title: movieData.title || "",
+              slug: movieData.slug || "",
+              description: movieData.description || "",
+              posterUrl: movieData.posterUrl || "",
+              duration: movieData.duration ? String(movieData.duration) : "",
+              releaseDate: movieData.releaseDate ? movieData.releaseDate.split("T")[0] : "",
+              language: movieData.language || "",
+              rating: movieData.rating ? String(movieData.rating) : "",
+              genreIds: movieData.genres ? movieData.genres.map((g) => g.id) : [],
+              actorIds: movieData.actors ? movieData.actors.map((a) => a.id) : [],
+            });
+          }
+        }
       } catch (err) {
-        console.error("Error loading genres and actors:", err);
+        console.error("Error loading edit/dropdown data:", err);
+        toast.error("Failed to load movie details");
       }
     };
 
     if (!authLoading) {
       loadData();
     }
-  }, [authLoading]);
+  }, [authLoading, isEditMode, movieId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -113,15 +134,21 @@ const CreateMovie = () => {
         actorIds: formData.actorIds,
       };
 
-      const response = await movieService.createMovie(moviePayload);
-      toast.success("Movie created successfully!");
-      navigate(`/movies/${response.id}`);
+      if (isEditMode) {
+        await movieService.updateMovie(movieId, moviePayload);
+        toast.success("Movie updated successfully!");
+        navigate("/admin/movies");
+      } else {
+        const response = await movieService.createMovie(moviePayload);
+        toast.success("Movie created successfully!");
+        navigate(`/movies/${response.id}`);
+      }
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message || err.message || "Failed to create movie";
+        err.response?.data?.message || err.message || "Failed to save movie";
       setError(errorMessage);
       toast.error(errorMessage);
-      console.error("Error creating movie:", err);
+      console.error("Error saving movie:", err);
     } finally {
       setLoading(false);
     }
@@ -142,10 +169,14 @@ const CreateMovie = () => {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Film className="w-8 h-8 text-indigo-500" />
-            <h1 className="text-4xl font-bold text-white">Create New Movie</h1>
+            <h1 className="text-4xl font-bold text-white">
+              {isEditMode ? "Edit Movie" : "Create New Movie"}
+            </h1>
           </div>
           <p className="text-slate-400">
-            Add a new movie to the catalog. Only admins can create movies.
+            {isEditMode
+              ? "Update the movie catalog details."
+              : "Add a new movie to the catalog. Only admins can create movies."}
           </p>
         </div>
 
@@ -345,8 +376,10 @@ const CreateMovie = () => {
               {loading ? (
                 <>
                   <Loader className="w-4 h-4 animate-spin inline mr-2" />
-                  Creating...
+                  {isEditMode ? "Updating..." : "Creating..."}
                 </>
+              ) : isEditMode ? (
+                "Update Movie"
               ) : (
                 "Create Movie"
               )}

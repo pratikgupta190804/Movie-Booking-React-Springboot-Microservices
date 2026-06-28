@@ -43,18 +43,18 @@ const AdminTheatreNav = () => {
             >
               + Create Movie
             </Link>
-            <a
-              href="#"
+            <Link
+              to="/admin/movies"
               className="block px-3 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               Manage Movies
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/admin/dashboard"
               className="block px-3 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               View Analytics
-            </a>
+            </Link>
           </div>
         )}
 
@@ -71,24 +71,24 @@ const AdminTheatreNav = () => {
             >
               + Create Theatre
             </Link>
-            <a
-              href="#"
+            <Link
+              to="/theatre/dashboard"
               className="block px-3 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               My Theatres
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/theatre/shows"
               className="block px-3 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               Manage Shows
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/theatre/dashboard"
               className="block px-3 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
               Bookings & Revenue
-            </a>
+            </Link>
           </div>
         )}
       </div>

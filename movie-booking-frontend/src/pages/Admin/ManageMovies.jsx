@@ -37,8 +37,7 @@ const ManageMovies = () => {
     }
 
     try {
-      // Note: Add delete method to movieService
-      // await movieService.deleteMovie(movieId);
+      await movieService.deleteMovie(movieId);
       toast.success("Movie deleted successfully!");
       setMovies(movies.filter((m) => m.id !== movieId));
     } catch (error) {
@@ -50,8 +49,8 @@ const ManageMovies = () => {
   const handleToggleStatus = async (movieId, currentStatus) => {
     try {
       const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-      // await movieService.updateMovieStatus(movieId, newStatus);
-      toast.success(`Movie ${newStatus.toLowerCase()}`);
+      await movieService.updateMovieStatus(movieId, newStatus);
+      toast.success(`Movie status updated to ${newStatus.toLowerCase()}`);
       setMovies(
         movies.map((m) => (m.id === movieId ? { ...m, status: newStatus } : m)),
       );

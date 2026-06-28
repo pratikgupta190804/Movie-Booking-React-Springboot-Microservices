@@ -25,7 +25,7 @@ public class ShowController {
     private final ShowService showService;
 
     @PostMapping
-    @PreAuthorize("hasRole('THEATRE_OWNER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('THEATRE_OWNER')")
     public ResponseEntity<ShowResponseDto> createShow(
             @Valid @RequestBody CreateShowRequestDto requestDto,
             @AuthenticationPrincipal Jwt jwt
@@ -36,7 +36,7 @@ public class ShowController {
     }
 
     @PutMapping("/{showId}")
-    @PreAuthorize("hasRole('THEATRE_OWNER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('THEATRE_OWNER')")
     public ResponseEntity<ShowResponseDto> updateShow(
             @PathVariable String showId,
             @Valid @RequestBody UpdateShowRequestDto requestDto,

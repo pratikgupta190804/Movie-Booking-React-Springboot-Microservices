@@ -15,8 +15,8 @@ setupInterceptors(showClient);
 export const showService = {
   async getAllShows() {
     // Since there's no getAllShows endpoint, use date-range with a wide range
-    const startDate = new Date("2000-01-01").toISOString();
-    const endDate = new Date("2099-12-31").toISOString();
+    const startDate = new Date("2000-01-01").toISOString().split(".")[0];
+    const endDate = new Date("2099-12-31").toISOString().split(".")[0];
     try {
       const response = await showClient.get("/shows/date-range", {
         params: {
@@ -54,5 +54,15 @@ export const showService = {
       },
     );
     return response.data || [];
+  },
+
+  async createShow(showData) {
+    const response = await showClient.post("/shows", showData);
+    return response.data;
+  },
+
+  async deleteShow(showId) {
+    const response = await showClient.delete(`/shows/${showId}`);
+    return response.data;
   },
 };

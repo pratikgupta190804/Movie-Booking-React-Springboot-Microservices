@@ -98,4 +98,8 @@ export const movieService = {
     const response = await movieClient.post("/actors", actorData);
     return response.data;
   },
+
+  async deleteMovie(movieId) {
+    return this.updateMovieStatus(movieId, "INACTIVE");
+  },
 };

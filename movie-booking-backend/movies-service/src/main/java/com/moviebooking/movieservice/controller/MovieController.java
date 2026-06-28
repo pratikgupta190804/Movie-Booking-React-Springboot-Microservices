@@ -88,4 +88,6 @@ public class MovieController {
         MovieResponseDto response = movieService.updateStatus(movieId, status, userId);
         return ResponseEntity.ok(response);
     }
+
+
 }
